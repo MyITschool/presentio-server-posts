@@ -1,11 +1,22 @@
 package models
 
-import "time"
+import (
+	"github.com/lib/pq"
+	"time"
+)
 
 type Post struct {
-	ID        int64     `gorm:"primaryKey" json:"id"`
-	UserID    int64     `binding:"required"`
-	User      User      `gorm:"foreignKey:UserID;references:id;" json:"user" binding:"required"`
-	Text      string    `json:"text" binding:"required"`
-	CreatedAt time.Time `json:"createdAt" binding:"required" gorm:"type:timestamp"`
+	ID           int64          `gorm:"primaryKey" json:"id"`
+	UserID       int64          `json:"userId" binding:"required"`
+	User         *User          `json:"user" binding:"required"`
+	Text         string         `json:"text" binding:"required"`
+	CreatedAt    time.Time      `json:"createdAt" binding:"required" gorm:"type:timestamp"`
+	Reposts      int64          `json:"reposts" binding:"required"`
+	Likes        int64          `json:"likes" binding:"required"`
+	SourceID     *int64         `json:"sourceId" binding:"required"`
+	Source       *Post          `json:"source" binding:"required"`
+	SourceUserID *int64         `json:"sourceUserId" binding:"required"`
+	SourceUser   *User          `json:"sourceUser" binding:"required"`
+	Attachments  pq.StringArray `json:"attachments" binding:"required" gorm:"type:varchar[]"`
+	Deleted      bool           `json:"deleted" binding:"required"`
 }
