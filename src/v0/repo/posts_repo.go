@@ -46,6 +46,7 @@ func (r *PostsRepo) GetUserPosts(userId int64, page int) ([]models.Post, error) 
 
 	err := r.db.
 		Where("posts.user_id = ?", userId).
+		Where("deleted = false").
 		Joins("User").
 		Joins("Source").
 		Joins("SourceUser").
