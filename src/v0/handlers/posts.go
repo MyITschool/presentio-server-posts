@@ -23,7 +23,7 @@ func CreatePostsHandler(group *gin.RouterGroup, postsRepo repo.PostsRepo) {
 
 	group.GET("/:id", handler.getPost)
 	group.POST("/", handler.createPost)
-	//group.GET("/recommended")
+	//group.GET("/recommended/:page", handler.getRecommended)
 	group.DELETE("/:id", handler.deletePost)
 	group.GET("/user/:id/:page", handler.getUserPosts)
 	group.GET("/user/self/:page", handler.getUserPostsSelf)
@@ -53,7 +53,7 @@ func (h *PostsHandler) getPost(c *gin.Context) {
 		return
 	}
 
-	post, err := h.PostsRepo.FindById(postId)
+	post, err := h.PostsRepo.FindById(postId, claims.ID)
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -69,10 +69,7 @@ func (h *PostsHandler) getPost(c *gin.Context) {
 	c.Header("Pragma", "")
 	c.Header("Expires", "")
 
-	c.JSON(200, gin.H{
-		"own":  post.UserID == claims.ID,
-		"post": post,
-	})
+	c.JSON(200, post)
 }
 
 type PostParams struct {
@@ -218,8 +215,5 @@ func (h *PostsHandler) doGetUserPosts(userId int64, c *gin.Context) {
 	c.Header("Pragma", "")
 	c.Header("Expires", "")
 
-	c.JSON(200, gin.H{
-		"own":   userId == claims.ID,
-		"posts": posts,
-	})
+	c.JSON(200, posts)
 }

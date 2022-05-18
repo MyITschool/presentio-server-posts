@@ -13,10 +13,14 @@ type Post struct {
 	CreatedAt    time.Time      `json:"createdAt" binding:"required" gorm:"type:timestamp"`
 	Reposts      int64          `json:"reposts" binding:"required"`
 	Likes        int64          `json:"likes" binding:"required"`
+	Comments     int64          `json:"comments" binding:"required"`
+	Tags         []*Tag         `json:"tags" gorm:"many2many:post_tags"`
 	SourceID     *int64         `json:"sourceId" binding:"required"`
 	Source       *Post          `json:"source" binding:"required"`
 	SourceUserID *int64         `json:"sourceUserId" binding:"required"`
 	SourceUser   *User          `json:"sourceUser" binding:"required"`
+	PhotoRatio   float64        `json:"photoRatio" binding:"required"`
 	Attachments  pq.StringArray `json:"attachments" binding:"required" gorm:"type:varchar[]"`
 	Deleted      bool           `json:"deleted" binding:"required"`
+	Own          bool           `json:"own" binding:"required"`
 }
