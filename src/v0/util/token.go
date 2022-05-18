@@ -20,15 +20,15 @@ func init() {
 	var err error
 
 	accessValidateKey, err = jwt.ParseRSAPublicKeyFromPEM([]byte(os.Getenv("TOKEN_PUBLIC_KEY")))
-
-	if err != nil {
-		var token []byte
-		token, err = os.ReadFile("token")
-
-		if err == nil {
-			accessValidateKey, err = jwt.ParseRSAPublicKeyFromPEM(token)
-		}
-	}
+	//
+	//if err != nil {
+	//	var token []byte
+	//	token, err = os.ReadFile("token")
+	//
+	//	if err == nil {
+	//		accessValidateKey, err = jwt.ParseRSAPublicKeyFromPEM(token)
+	//	}
+	//}
 
 	if err != nil {
 		panic("Unable to read RSA public key")
