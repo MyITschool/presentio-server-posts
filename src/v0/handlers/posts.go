@@ -53,7 +53,7 @@ func (h *PostsHandler) getPost(c *gin.Context) {
 		return
 	}
 
-	post, err := h.PostsRepo.FindById(postId, claims.ID)
+	post, err := h.PostsRepo.FindById(postId)
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -64,6 +64,8 @@ func (h *PostsHandler) getPost(c *gin.Context) {
 
 		return
 	}
+
+	post.Own = post.UserID == claims.ID
 
 	c.Header("Cache-Control", "public, max-age=18000")
 	c.Header("Pragma", "")
@@ -203,6 +205,10 @@ func (h *PostsHandler) doGetUserPosts(userId int64, c *gin.Context) {
 	if err != nil {
 		c.Status(500)
 		return
+	}
+
+	for i := 0; i < len(posts); i++ {
+		posts[i].Own = posts[i].UserID == claims.ID
 	}
 
 	cache := "18000"

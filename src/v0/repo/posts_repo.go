@@ -15,14 +15,14 @@ func CreatePostsRepo(db *gorm.DB) PostsRepo {
 	}
 }
 
-func (r *PostsRepo) FindById(postId int64, userId int64) (*models.Post, error) {
+func (r *PostsRepo) FindById(postId int64) (*models.Post, error) {
 	var post models.Post
 
 	result := r.db.
 		Joins("User").
 		Joins("Source").
 		Joins("SourceUser").
-		Select("posts.user_id = ? AS own", userId).
+		Preload("Tags").
 		Where("posts.id = ?", postId).
 		First(&post)
 
@@ -46,7 +46,6 @@ func (r *PostsRepo) GetUserPosts(userId int64, page int) ([]models.Post, error) 
 	var posts []models.Post
 
 	err := r.db.
-		Select("posts.user_id = ? AS own", userId).
 		Where("posts.user_id = ?", userId).
 		Where("posts.deleted = false").
 		Joins("User").
