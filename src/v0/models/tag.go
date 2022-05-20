@@ -1,7 +1,6 @@
 package models
 
 type Tag struct {
-	ID     int64 `json:"id" gorm:"primaryKey"`
-	TagId  int64 `json:"tagId" binding:"required"`
-	PostId int64 `json:"postId" binding:"required"`
+	ID   int64  `json:"id" gorm:"primaryKey"`
+	Name string `json:"name" binding:"required"`
 }
