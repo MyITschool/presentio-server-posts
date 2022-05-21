@@ -218,7 +218,7 @@ func (h *PostsHandler) doGetUserPosts(userId int64, c *gin.Context) {
 		cache = "300"
 	}
 
-	c.Header("Cache", "public, max-age="+cache)
+	c.Header("Cache-Control", "public, max-age="+cache)
 	c.Header("Pragma", "")
 	c.Header("Expires", "")
 
