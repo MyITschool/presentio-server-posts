@@ -10,7 +10,6 @@ import (
 	"presentio-server-posts/src/v0/repo"
 	"presentio-server-posts/src/v0/util"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -29,7 +28,7 @@ func CreatePostsHandler(group *gin.RouterGroup, postsRepo repo.PostsRepo) {
 	group.DELETE("/:id", handler.deletePost)
 	group.GET("/user/:id/:page", handler.getUserPosts)
 	group.GET("/user/self/:page", handler.getUserPostsSelf)
-	group.GET("/search/:query/:page", handler.search)
+	group.GET("/search/:page", handler.search)
 }
 
 func (h *PostsHandler) getPost(c *gin.Context) {
@@ -254,23 +253,8 @@ func (h *PostsHandler) search(c *gin.Context) {
 		return
 	}
 
-	parts := strings.Split(c.Param("query"), "&")
-
-	if len(parts) > 10 {
-		c.Status(422)
-		return
-	}
-
-	tags := make([]string, 0, 10)
-	keywords := make([]string, 0, 10)
-
-	for _, part := range parts {
-		if part[0] == '#' {
-			tags = append(tags, part)
-		} else {
-			keywords = append(keywords, part)
-		}
-	}
+	tags := c.QueryArray("tag")
+	keywords := c.QueryArray("keyword")
 
 	posts, err := h.PostsRepo.FindByQuery(tags, keywords, page)
 
