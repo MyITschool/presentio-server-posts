@@ -65,6 +65,7 @@ func (r *PostsRepo) FindByQuery(tags []string, keywords []string, page int) ([]m
 	var posts []models.Post
 
 	tx := r.db.
+		Distinct().
 		Where("posts.deleted = false").
 		Joins("User").
 		Joins("Source").
