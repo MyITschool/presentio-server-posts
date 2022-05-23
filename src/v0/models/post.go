@@ -21,6 +21,7 @@ type Post struct {
 	SourceUser   *User          `json:"sourceUser" binding:"required"`
 	PhotoRatio   float64        `json:"photoRatio" binding:"required"`
 	Attachments  pq.StringArray `json:"attachments" binding:"required" gorm:"type:varchar[]"`
+	Lang         string         `json:"lang" binding:"required"`
 	Deleted      bool           `json:"deleted" binding:"required"`
 	Own          bool           `json:"own" gorm:"-"`
 }

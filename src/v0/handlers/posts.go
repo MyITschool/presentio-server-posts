@@ -3,12 +3,14 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"github.com/abadojack/whatlanggo"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"presentio-server-posts/src/v0/models"
 	"presentio-server-posts/src/v0/repo"
 	"presentio-server-posts/src/v0/util"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -27,6 +29,7 @@ func CreatePostsHandler(group *gin.RouterGroup, postsRepo repo.PostsRepo) {
 	group.DELETE("/:id", handler.deletePost)
 	group.GET("/user/:id/:page", handler.getUserPosts)
 	group.GET("/user/self/:page", handler.getUserPostsSelf)
+	group.GET("/search/:query/:page", handler.search)
 }
 
 func (h *PostsHandler) getPost(c *gin.Context) {
@@ -106,12 +109,15 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		return
 	}
 
+	lang := whatlanggo.DetectLang(params.Text).String()
+
 	post := models.Post{
 		UserID:       claims.ID,
 		Text:         params.Text,
 		CreatedAt:    time.Now(),
 		SourceID:     params.SourceID,
 		SourceUserID: params.SourceUserId,
+		Lang:         lang,
 	}
 
 	err = h.PostsRepo.Create(&post)
@@ -221,6 +227,56 @@ func (h *PostsHandler) doGetUserPosts(userId int64, c *gin.Context) {
 	c.Header("Cache-Control", "public, max-age="+cache)
 	c.Header("Pragma", "")
 	c.Header("Expires", "")
+
+	c.JSON(200, posts)
+}
+
+func (h *PostsHandler) search(c *gin.Context) {
+	token, err := util.ValidateAccessTokenHeader(c.GetHeader("Authorization"))
+
+	if err != nil {
+		c.Status(util.HandleTokenError(err))
+		return
+	}
+
+	page, err := strconv.Atoi(c.Param("page"))
+
+	if err != nil {
+		c.Status(404)
+
+		return
+	}
+
+	claims, ok := token.Claims.(*util.UserClaims)
+
+	if !ok {
+		c.Status(403)
+		return
+	}
+
+	parts := strings.Split(c.Param("query"), "&")
+
+	if len(parts) > 10 {
+		c.Status(422)
+		return
+	}
+
+	tags := make([]string, 10)
+	keywords := make([]string, 10)
+
+	for _, part := range parts {
+		if part[0] == '#' {
+			tags = append(tags, part)
+		} else {
+			keywords = append(keywords, part)
+		}
+	}
+
+	posts, err := h.PostsRepo.FindByQuery(tags, keywords, page)
+
+	for i := 0; i < len(posts); i++ {
+		posts[i].Own = posts[i].UserID == claims.ID
+	}
 
 	c.JSON(200, posts)
 }
