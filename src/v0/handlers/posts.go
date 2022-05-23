@@ -262,5 +262,8 @@ func (h *PostsHandler) search(c *gin.Context) {
 		posts[i].Own = posts[i].UserID == claims.ID
 	}
 
+	c.Header("Cache-Control", "public, max-age=300")
+	c.Header("Pragma", "")
+	c.Header("Expires", "")
 	c.JSON(200, posts)
 }
