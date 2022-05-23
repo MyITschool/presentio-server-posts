@@ -261,8 +261,8 @@ func (h *PostsHandler) search(c *gin.Context) {
 		return
 	}
 
-	tags := make([]string, 10)
-	keywords := make([]string, 10)
+	tags := make([]string, 0, 10)
+	keywords := make([]string, 0, 10)
 
 	for _, part := range parts {
 		if part[0] == '#' {
