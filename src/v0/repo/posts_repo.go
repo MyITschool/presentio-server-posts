@@ -110,3 +110,10 @@ func (r *PostsRepo) DecrementLikes(postId int64) (int64, error) {
 
 	return tx.RowsAffected, tx.Error
 }
+
+func (r *PostsRepo) IncrementComments(postId int64) (int64, error) {
+	tx := r.db.
+		Exec("UPDATE posts SET comments = comments + 1 WHERE id = ? AND deleted = false", postId)
+
+	return tx.RowsAffected, tx.Error
+}
