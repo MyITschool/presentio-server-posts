@@ -45,7 +45,7 @@ func (r *PostsRepo) DeleteWithGuard(postId int64, userId int64) (int64, error) {
 	return tx.RowsAffected, tx.Error
 }
 
-func (r *PostsRepo) GetUserPosts(userId int64, page int) ([]models.Post, error) {
+func (r *PostsRepo) GetUserPosts(userId int64, page int, myUserId int64) ([]models.Post, error) {
 	var posts []models.Post
 
 	err := r.db.
@@ -54,6 +54,7 @@ func (r *PostsRepo) GetUserPosts(userId int64, page int) ([]models.Post, error) 
 		Joins("User").
 		Joins("Source").
 		Joins("SourceUser").
+		Joins("Liked", "? = likes.user_id and posts.id = likes.post_id", myUserId).
 		Preload("Tags").
 		Limit(20).
 		Offset(20 * page).
@@ -63,12 +64,13 @@ func (r *PostsRepo) GetUserPosts(userId int64, page int) ([]models.Post, error) 
 	return posts, err
 }
 
-func (r *PostsRepo) FindByQuery(tags []string, keywords []string, page int) ([]models.Post, error) {
+func (r *PostsRepo) FindByQuery(tags []string, keywords []string, page int, userId int64) ([]models.Post, error) {
 	var posts []models.Post
 
 	tx := r.db.
 		Distinct().
 		Where("posts.deleted = false").
+		Joins("Liked", "? = likes.user_id and posts.id = likes.post_id", userId).
 		Joins("User").
 		Joins("Source").
 		Joins("SourceUser").

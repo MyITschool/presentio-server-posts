@@ -207,7 +207,7 @@ func (h *PostsHandler) doGetUserPosts(userId int64, c *gin.Context) {
 		userId = claims.ID
 	}
 
-	posts, err := h.PostsRepo.GetUserPosts(userId, page)
+	posts, err := h.PostsRepo.GetUserPosts(userId, page, claims.ID)
 
 	if err != nil {
 		c.Status(500)
@@ -257,7 +257,7 @@ func (h *PostsHandler) search(c *gin.Context) {
 	tags := c.QueryArray("tag")
 	keywords := c.QueryArray("keyword")
 
-	posts, err := h.PostsRepo.FindByQuery(tags, keywords, page)
+	posts, err := h.PostsRepo.FindByQuery(tags, keywords, page, claims.ID)
 
 	for i := 0; i < len(posts); i++ {
 		posts[i].Own = posts[i].UserID == claims.ID
