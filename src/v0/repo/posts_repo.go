@@ -16,13 +16,14 @@ func CreatePostsRepo(db *gorm.DB) PostsRepo {
 	}
 }
 
-func (r *PostsRepo) FindById(postId int64) (*models.Post, error) {
+func (r *PostsRepo) FindById(postId int64, userId int64) (*models.Post, error) {
 	var post models.Post
 
 	result := r.db.
 		Joins("User").
 		Joins("Source").
 		Joins("SourceUser").
+		Joins("Liked", r.db.Where(&models.Like{UserID: userId, PostID: postId})).
 		Preload("Tags").
 		Where("posts.id = ?", postId).
 		First(&post)
@@ -34,13 +35,14 @@ func (r *PostsRepo) Create(post *models.Post) error {
 	return r.db.Create(&post).Error
 }
 
-func (r *PostsRepo) DeleteWithGuard(postId int64, userID int64) error {
-	return r.db.
+func (r *PostsRepo) DeleteWithGuard(postId int64, userId int64) (int64, error) {
+	tx := r.db.
 		Where("id = ?", postId).
-		Where("user_id = ?", userID).
+		Where("user_id = ?", userId).
 		Model((*models.Post)(nil)).
-		Updates(map[string]interface{}{"text": "", "deleted": true, "reposts": 0, "likes": 0}).
-		Error
+		Updates(map[string]interface{}{"text": "", "deleted": true, "reposts": 0, "likes": 0})
+
+	return tx.RowsAffected, tx.Error
 }
 
 func (r *PostsRepo) GetUserPosts(userId int64, page int) ([]models.Post, error) {
@@ -87,4 +89,18 @@ func (r *PostsRepo) FindByQuery(tags []string, keywords []string, page int) ([]m
 	err := tx.Find(&posts).Error
 
 	return posts, err
+}
+
+func (r *PostsRepo) IncrementLikes(postId int64) (int64, error) {
+	tx := r.db.
+		Exec("UPDATE posts SET likes = likes + 1 WHERE id = ?", postId)
+
+	return tx.RowsAffected, tx.Error
+}
+
+func (r *PostsRepo) DecrementLikes(postId int64) (int64, error) {
+	tx := r.db.
+		Exec("UPDATE posts SET likes = likes - 1 WHERE id = ?", postId)
+
+	return tx.RowsAffected, tx.Error
 }

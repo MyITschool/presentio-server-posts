@@ -17,11 +17,7 @@ type PostsHandler struct {
 	PostsRepo repo.PostsRepo
 }
 
-func CreatePostsHandler(group *gin.RouterGroup, postsRepo repo.PostsRepo) {
-	handler := PostsHandler{
-		PostsRepo: postsRepo,
-	}
-
+func SetupPostsHandler(group *gin.RouterGroup, handler *PostsHandler) {
 	group.GET("/:id", handler.getPost)
 	group.POST("/", handler.createPost)
 	//group.GET("/recommended/:page", handler.getRecommended)
@@ -55,7 +51,7 @@ func (h *PostsHandler) getPost(c *gin.Context) {
 		return
 	}
 
-	post, err := h.PostsRepo.FindById(postId)
+	post, err := h.PostsRepo.FindById(postId, claims.ID)
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -152,7 +148,12 @@ func (h *PostsHandler) deletePost(c *gin.Context) {
 		return
 	}
 
-	err = h.PostsRepo.DeleteWithGuard(postId, claims.ID)
+	rows, err := h.PostsRepo.DeleteWithGuard(postId, claims.ID)
+
+	if rows == 0 {
+		c.Status(404)
+		return
+	}
 
 	if err != nil {
 		fmt.Println(err.Error())

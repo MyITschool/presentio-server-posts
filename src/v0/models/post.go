@@ -22,6 +22,7 @@ type Post struct {
 	PhotoRatio   float64        `json:"photoRatio" binding:"required"`
 	Attachments  pq.StringArray `json:"attachments" binding:"required" gorm:"type:varchar[]"`
 	Lang         string         `json:"lang" binding:"required"`
+	Liked        Like           `json:"liked"`
 	Deleted      bool           `json:"deleted" binding:"required"`
 	Own          bool           `json:"own" gorm:"-"`
 }

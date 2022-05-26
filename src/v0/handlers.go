@@ -13,6 +13,14 @@ type Config struct {
 
 func SetupRouter(group *gin.RouterGroup, config *Config) {
 	postsRepo := repo.CreatePostsRepo(config.Db)
+	likesRepo := repo.CreateLikesRepo(config.Db)
 
-	handlers.CreatePostsHandler(group.Group("/posts"), postsRepo)
+	handlers.SetupPostsHandler(group.Group("/posts"), &handlers.PostsHandler{
+		PostsRepo: postsRepo,
+	})
+
+	handlers.SetupLikesHandler(group.Group("/likes"), &handlers.LikesHandler{
+		PostsRepo: postsRepo,
+		LikesRepo: likesRepo,
+	})
 }
