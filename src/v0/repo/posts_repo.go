@@ -60,6 +60,7 @@ func (r *PostsRepo) GetUserPosts(userId int64, page int, myUserId int64) ([]mode
 		Preload("Tags").
 		Limit(20).
 		Offset(20 * page).
+		Order("posts.id").
 		Find(&posts).
 		Error
 
@@ -80,7 +81,8 @@ func (r *PostsRepo) FindByQuery(tags []string, keywords []string, page int, user
 		Joins("JOIN tags t ON t.id = pt.tag_id").
 		Preload("Tags").
 		Limit(20).
-		Offset(20 * page)
+		Offset(20 * page).
+		Order("posts.id")
 
 	if len(tags) > 0 {
 		tx = tx.Where("t.name IN ?", tags)
