@@ -25,7 +25,7 @@ func (r *PostsRepo) FindById(postId int64, userId int64) (*models.Post, error) {
 		Joins("SourceUser").
 		Joins("Liked", r.db.Where(&models.Like{UserID: userId, PostID: postId})).
 		Preload("Tags").
-		Where("deleted = false").
+		Where("posts.deleted = false").
 		Where("posts.id = ?", postId).
 		First(&post)
 
