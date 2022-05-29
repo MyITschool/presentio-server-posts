@@ -76,6 +76,7 @@ func (h *PostsHandler) getPost(c *gin.Context) {
 type PostParams struct {
 	Text         string
 	Tags         []string
+	Attachments  []string
 	SourceID     *int64
 	SourceUserId *int64
 }
@@ -85,7 +86,7 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&params)
 
-	if err != nil {
+	if err != nil || len(params.Tags) > 5 {
 		c.Status(400)
 		return
 	}
@@ -106,6 +107,14 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 
 	lang := whatlanggo.DetectLang(params.Text).String()
 
+	tags := make([]models.Tag, 0, len(params.Tags))
+
+	for i := 0; i < len(params.Tags); i++ {
+		tags = append(tags, models.Tag{
+			Name: params.Tags[i],
+		})
+	}
+
 	post := models.Post{
 		UserID:       claims.ID,
 		Text:         params.Text,
@@ -113,16 +122,43 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		SourceID:     params.SourceID,
 		SourceUserID: params.SourceUserId,
 		Lang:         lang,
+		Attachments:  params.Attachments,
 	}
 
-	err = h.PostsRepo.Create(&post)
+	err = h.PostsRepo.Transaction(func(tx *gorm.DB) error {
+		err = tx.Create(&post).Error
+
+		tagsRepo := repo.CreateTagsRepo(tx)
+
+		if err != nil {
+			return err
+		}
+
+		if len(tags) == 0 {
+			return nil
+		}
+
+		err = tagsRepo.BulkInsert(tags)
+
+		if err != nil {
+			return err
+		}
+
+		err = tagsRepo.BulkInsertRelation(tags, post.ID)
+
+		if err != nil {
+			return err
+		}
+
+		c.Status(201)
+
+		return nil
+	})
 
 	if err != nil {
 		c.Status(500)
 		return
 	}
-
-	c.Status(201)
 }
 
 func (h *PostsHandler) deletePost(c *gin.Context) {

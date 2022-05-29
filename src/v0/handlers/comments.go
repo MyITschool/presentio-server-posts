@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"presentio-server-posts/src/v0/models"
 	"presentio-server-posts/src/v0/repo"
 	"presentio-server-posts/src/v0/util"
@@ -53,32 +54,43 @@ func (h *CommentsHandler) createComment(c *gin.Context) {
 		return
 	}
 
-	rows, err := h.PostsRepo.IncrementComments(postId)
+	err = h.CommentsRepo.Transaction(func(tx *gorm.DB) error {
+		rows, err := h.PostsRepo.IncrementComments(postId)
+
+		if err != nil {
+			return err
+		}
+
+		if rows == 0 {
+			c.Status(404)
+			return nil
+		}
+
+		comment := &models.Comment{
+			Text:   params.Text,
+			UserID: claims.ID,
+			PostID: postId,
+		}
+
+		err = h.CommentsRepo.Create(comment)
+
+		if err != nil {
+			return err
+		}
+
+		c.JSON(201, comment)
+		return nil
+	})
+
+	if err != nil {
+		return
+	}
 
 	if err != nil {
 		c.Status(500)
 		return
 	}
 
-	if rows == 0 {
-		c.Status(404)
-		return
-	}
-
-	comment := &models.Comment{
-		Text:   params.Text,
-		UserID: claims.ID,
-		PostID: postId,
-	}
-
-	err = h.CommentsRepo.Create(comment)
-
-	if err != nil {
-		c.Status(500)
-		return
-	}
-
-	c.JSON(201, comment)
 }
 
 func (h *CommentsHandler) getPostComments(c *gin.Context) {

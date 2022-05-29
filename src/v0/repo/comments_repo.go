@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"database/sql"
 	"gorm.io/gorm"
 	"presentio-server-posts/src/v0/models"
 )
@@ -17,6 +18,10 @@ func CreateCommentsRepo(db *gorm.DB) CommentsRepo {
 
 func (r *CommentsRepo) Create(comment *models.Comment) error {
 	return r.db.Create(comment).Error
+}
+
+func (r *CommentsRepo) Transaction(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error {
+	return r.db.Transaction(fc, opts...)
 }
 
 func (r *CommentsRepo) GetPostComments(postId int64, page int) ([]models.Comment, error) {

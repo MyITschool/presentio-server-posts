@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"database/sql"
 	"gorm.io/gorm"
 	"presentio-server-posts/src/v0/models"
 	"strings"
@@ -60,7 +61,7 @@ func (r *PostsRepo) GetUserPosts(userId int64, page int, myUserId int64) ([]mode
 		Preload("Tags").
 		Limit(20).
 		Offset(20 * page).
-		Order("posts.id").
+		Order("posts.id DESC").
 		Find(&posts).
 		Error
 
@@ -95,6 +96,10 @@ func (r *PostsRepo) FindByQuery(tags []string, keywords []string, page int, user
 	err := tx.Find(&posts).Error
 
 	return posts, err
+}
+
+func (r *PostsRepo) Transaction(fc func(tx *gorm.DB) error, opts ...*sql.TxOptions) error {
+	return r.db.Transaction(fc, opts...)
 }
 
 func (r *PostsRepo) IncrementLikes(postId int64) (int64, error) {
