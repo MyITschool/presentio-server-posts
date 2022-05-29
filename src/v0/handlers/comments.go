@@ -65,18 +65,20 @@ func (h *CommentsHandler) createComment(c *gin.Context) {
 		return
 	}
 
-	err = h.CommentsRepo.Create(&models.Comment{
+	comment := &models.Comment{
 		Text:   params.Text,
 		UserID: claims.ID,
 		PostID: postId,
-	})
+	}
+
+	err = h.CommentsRepo.Create(comment)
 
 	if err != nil {
 		c.Status(500)
 		return
 	}
 
-	c.Status(201)
+	c.JSON(201, comment)
 }
 
 func (h *CommentsHandler) getPostComments(c *gin.Context) {
