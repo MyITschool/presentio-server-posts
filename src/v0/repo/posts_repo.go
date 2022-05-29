@@ -26,6 +26,7 @@ func (r *PostsRepo) FindById(postId int64, userId int64) (*models.Post, error) {
 		Joins("SourceUser").
 		Joins("Liked", r.db.Where(&models.Like{UserID: userId, PostID: postId})).
 		Preload("Tags").
+		Preload("Source.Tags").
 		Where("posts.deleted = false").
 		Where("posts.id = ?", postId).
 		First(&post)
@@ -59,6 +60,7 @@ func (r *PostsRepo) GetUserPosts(userId int64, page int, myUserId int64) ([]mode
 		Joins("SourceUser").
 		Joins("Liked", "? = likes.user_id and posts.id = likes.post_id", myUserId).
 		Preload("Tags").
+		Preload("Source.Tags").
 		Limit(20).
 		Offset(20 * page).
 		Order("posts.id DESC").
@@ -81,6 +83,7 @@ func (r *PostsRepo) FindByQuery(tags []string, keywords []string, page int, user
 		Joins("JOIN post_tags pt ON posts.id = pt.post_id").
 		Joins("JOIN tags t ON t.id = pt.tag_id").
 		Preload("Tags").
+		Preload("Source.Tags").
 		Limit(20).
 		Offset(20 * page).
 		Order("posts.id")
