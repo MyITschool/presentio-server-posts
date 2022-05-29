@@ -53,7 +53,7 @@ func (h *CommentsHandler) createComment(c *gin.Context) {
 		return
 	}
 
-	rows, err := h.PostsRepo.IncrementLikes(postId)
+	rows, err := h.PostsRepo.IncrementComments(postId)
 
 	if err != nil {
 		c.Status(500)
