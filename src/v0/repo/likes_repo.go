@@ -36,10 +36,7 @@ func (r *LikesRepo) Create(like *models.Like) error {
 }
 
 func (r *LikesRepo) Delete(like *models.Like) (int64, error) {
-	tx := r.db.
-		Where("user_id = ?", like.UserID).
-		Where("post_id = ?", like.PostID).
-		Delete(like)
+	tx := r.db.Delete(like)
 
 	return tx.RowsAffected, tx.Error
 }

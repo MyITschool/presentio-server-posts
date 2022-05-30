@@ -55,7 +55,10 @@ func (h *CommentsHandler) createComment(c *gin.Context) {
 	}
 
 	err = h.CommentsRepo.Transaction(func(tx *gorm.DB) error {
-		rows, err := h.PostsRepo.IncrementComments(postId)
+		commentsRepo := repo.CreateCommentsRepo(tx)
+		postsRepo := repo.CreatePostsRepo(tx)
+
+		rows, err := postsRepo.IncrementComments(postId)
 
 		if err != nil {
 			return err
@@ -72,7 +75,7 @@ func (h *CommentsHandler) createComment(c *gin.Context) {
 			PostID: postId,
 		}
 
-		err = h.CommentsRepo.Create(comment)
+		err = commentsRepo.Create(comment)
 
 		if err != nil {
 			return err

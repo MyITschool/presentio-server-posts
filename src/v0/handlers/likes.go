@@ -10,8 +10,6 @@ import (
 	"strconv"
 )
 
-// likes, comments, reposts
-
 type LikesHandler struct {
 	PostsRepo repo.PostsRepo
 	LikesRepo repo.LikesRepo
@@ -45,7 +43,10 @@ func (h *LikesHandler) likePost(c *gin.Context) {
 	}
 
 	err = h.LikesRepo.Transaction(func(tx *gorm.DB) error {
-		_, err = h.LikesRepo.FindByIds(claims.ID, postId)
+		likesRepo := repo.CreateLikesRepo(tx)
+		postsRepo := repo.CreatePostsRepo(tx)
+
+		_, err = likesRepo.FindByIds(claims.ID, postId)
 
 		if err == nil {
 			c.Status(409)
@@ -56,7 +57,7 @@ func (h *LikesHandler) likePost(c *gin.Context) {
 			return err
 		}
 
-		rows, err := h.PostsRepo.IncrementLikes(postId)
+		rows, err := postsRepo.IncrementLikes(postId)
 
 		if rows == 0 {
 			c.Status(404)
@@ -67,7 +68,7 @@ func (h *LikesHandler) likePost(c *gin.Context) {
 			return err
 		}
 
-		err = h.LikesRepo.Create(&models.Like{
+		err = likesRepo.Create(&models.Like{
 			UserID: claims.ID,
 			PostID: postId,
 		})
@@ -109,7 +110,10 @@ func (h *LikesHandler) removeLike(c *gin.Context) {
 	}
 
 	err = h.LikesRepo.Transaction(func(tx *gorm.DB) error {
-		_, err = h.LikesRepo.FindByIds(claims.ID, postId)
+		likesRepo := repo.CreateLikesRepo(tx)
+		postsRepo := repo.CreatePostsRepo(tx)
+
+		_, err = likesRepo.FindByIds(claims.ID, postId)
 
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.Status(409)
@@ -120,7 +124,7 @@ func (h *LikesHandler) removeLike(c *gin.Context) {
 			return err
 		}
 
-		rows, err := h.PostsRepo.DecrementLikes(postId)
+		rows, err := postsRepo.DecrementLikes(postId)
 
 		if rows == 0 {
 			c.Status(404)
@@ -131,7 +135,7 @@ func (h *LikesHandler) removeLike(c *gin.Context) {
 			return err
 		}
 
-		_, err = h.LikesRepo.Delete(&models.Like{
+		_, err = likesRepo.Delete(&models.Like{
 			UserID: claims.ID,
 			PostID: postId,
 		})
