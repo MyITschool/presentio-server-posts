@@ -58,7 +58,7 @@ func (r *PostsRepo) GetUserPosts(userId int64, page int, myUserId int64) ([]mode
 		Joins("User").
 		Joins("Source").
 		Joins("SourceUser").
-		Joins("Liked", "? = likes.user_id and posts.id = likes.post_id", myUserId).
+		Joins("Liked", r.db.Where(&models.Like{UserID: myUserId})).
 		Preload("Tags").
 		Preload("Source.Tags").
 		Limit(20).
