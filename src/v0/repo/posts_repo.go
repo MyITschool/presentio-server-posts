@@ -17,14 +17,14 @@ func CreatePostsRepo(db *gorm.DB) PostsRepo {
 	}
 }
 
-func (r *PostsRepo) FindById(postId int64, userId int64) (*models.Post, error) {
+func (r *PostsRepo) FindById(postId int64, myUserId int64) (*models.Post, error) {
 	var post models.Post
 
 	result := r.db.
 		Joins("User").
 		Joins("Source").
 		Joins("SourceUser").
-		Joins("Liked", r.db.Where(&models.Like{UserID: userId, PostID: postId})).
+		Joins("Liked", r.db.Where(&models.Like{UserID: myUserId})).
 		Preload("Tags").
 		Preload("Source.Tags").
 		Where("posts.deleted = false").
@@ -70,13 +70,13 @@ func (r *PostsRepo) GetUserPosts(userId int64, page int, myUserId int64) ([]mode
 	return posts, err
 }
 
-func (r *PostsRepo) FindByQuery(tags []string, keywords []string, page int, userId int64) ([]models.Post, error) {
+func (r *PostsRepo) FindByQuery(tags []string, keywords []string, page int, myUserId int64) ([]models.Post, error) {
 	var posts []models.Post
 
 	tx := r.db.
 		Distinct().
 		Where("posts.deleted = false").
-		Joins("Liked", "? = likes.user_id and posts.id = likes.post_id", userId).
+		Joins("Liked", r.db.Where(&models.Like{UserID: myUserId})).
 		Joins("User").
 		Joins("Source").
 		Joins("SourceUser").
