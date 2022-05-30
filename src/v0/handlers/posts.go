@@ -81,12 +81,40 @@ type PostParams struct {
 	SourceUserId *int64
 }
 
+func validateParams(params *PostParams) bool {
+	if params.SourceUserId == nil && params.SourceID != nil {
+		return false
+	}
+
+	if params.SourceUserId != nil && params.SourceID == nil {
+		return false
+	}
+
+	if len(params.Text) < 1 {
+		return false
+	}
+
+	if params.SourceID != nil && (len(params.Tags) > 0 || len(params.Attachments) > 0) {
+		return false
+	}
+
+	if len(params.Tags) < 1 || len(params.Tags) > 5 {
+		return false
+	}
+
+	if len(params.Attachments) < 1 || len(params.Attachments) > 10 {
+		return false
+	}
+
+	return true
+}
+
 func (h *PostsHandler) createPost(c *gin.Context) {
 	var params PostParams
 
 	err := c.ShouldBindJSON(&params)
 
-	if err != nil || len(params.Tags) > 5 {
+	if err != nil || !validateParams(&params) {
 		c.Status(400)
 		return
 	}
