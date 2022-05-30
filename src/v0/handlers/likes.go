@@ -135,10 +135,7 @@ func (h *LikesHandler) removeLike(c *gin.Context) {
 			return err
 		}
 
-		_, err = likesRepo.Delete(&models.Like{
-			UserID: claims.ID,
-			PostID: postId,
-		})
+		_, err = likesRepo.Delete(claims.ID, postId)
 
 		if err != nil {
 			return err
