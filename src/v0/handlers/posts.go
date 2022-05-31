@@ -149,6 +149,11 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		})
 	}
 
+	if params.PhotoRatio == nil {
+		r := 0.0
+		params.PhotoRatio = &r
+	}
+
 	post := models.Post{
 		UserID:       claims.ID,
 		Text:         params.Text,
