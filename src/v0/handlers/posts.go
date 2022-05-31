@@ -120,7 +120,7 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 	err := c.ShouldBindJSON(&params)
 
 	if err != nil || !validateParams(&params) {
-		c.Status(400)
+		c.Status(422)
 		return
 	}
 
