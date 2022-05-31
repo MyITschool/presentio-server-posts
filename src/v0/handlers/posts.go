@@ -10,6 +10,7 @@ import (
 	"presentio-server-posts/src/v0/repo"
 	"presentio-server-posts/src/v0/util"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -138,7 +139,7 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		return
 	}
 
-	lang := whatlanggo.DetectLang(params.Text).String()
+	lang := strings.ToLower(whatlanggo.DetectLang(params.Text).String())
 
 	tags := make([]models.Tag, 0, len(params.Tags))
 
