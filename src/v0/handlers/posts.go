@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"github.com/abadojack/whatlanggo"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -166,9 +165,23 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 	}
 
 	err = h.PostsRepo.Transaction(func(tx *gorm.DB) error {
-		err = tx.Create(&post).Error
-
+		postsRepo := repo.CreatePostsRepo(tx)
 		tagsRepo := repo.CreateTagsRepo(tx)
+
+		if post.SourceID != nil {
+			rows, err := postsRepo.IncrementReposts(*post.SourceID)
+
+			if err != nil {
+				return err
+			}
+
+			if rows == 0 {
+				c.Status(404)
+				return nil
+			}
+		}
+
+		err = postsRepo.Create(&post)
 
 		if err != nil {
 			return err
@@ -189,7 +202,6 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		if err != nil {
 			return err
 		}
-
 		c.Status(201)
 
 		return nil
@@ -226,14 +238,13 @@ func (h *PostsHandler) deletePost(c *gin.Context) {
 
 	rows, err := h.PostsRepo.DeleteWithGuard(postId, claims.ID)
 
-	if rows == 0 {
-		c.Status(404)
+	if err != nil {
+		c.Status(500)
 		return
 	}
 
-	if err != nil {
-		fmt.Println(err.Error())
-		c.Status(500)
+	if rows == 0 {
+		c.Status(404)
 		return
 	}
 

@@ -159,3 +159,10 @@ func (r *PostsRepo) IncrementComments(postId int64) (int64, error) {
 
 	return tx.RowsAffected, tx.Error
 }
+
+func (r *PostsRepo) IncrementReposts(postId int64) (int64, error) {
+	tx := r.db.
+		Exec("UPDATE posts SET reposts = reposts + 1 WHERE id = ? AND deleted = false", postId)
+
+	return tx.RowsAffected, tx.Error
+}

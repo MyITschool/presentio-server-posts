@@ -59,13 +59,13 @@ func (h *LikesHandler) likePost(c *gin.Context) {
 
 		rows, err := postsRepo.IncrementLikes(postId)
 
+		if err != nil {
+			return err
+		}
+
 		if rows == 0 {
 			c.Status(404)
 			return nil
-		}
-
-		if err != nil {
-			return err
 		}
 
 		err = likesRepo.Create(&models.Like{
@@ -126,13 +126,13 @@ func (h *LikesHandler) removeLike(c *gin.Context) {
 
 		rows, err := postsRepo.DecrementLikes(postId)
 
+		if err != nil {
+			return err
+		}
+
 		if rows == 0 {
 			c.Status(404)
 			return nil
-		}
-
-		if err != nil {
-			return err
 		}
 
 		_, err = likesRepo.Delete(claims.ID, postId)
