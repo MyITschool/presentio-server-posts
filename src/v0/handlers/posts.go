@@ -162,7 +162,7 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		SourceUserID: params.SourceUserId,
 		Lang:         lang,
 		Attachments:  params.Attachments,
-		PhotoRatio:   params.PhotoRatio,
+		PhotoRatio:   *params.PhotoRatio,
 	}
 
 	err = h.PostsRepo.Transaction(func(tx *gorm.DB) error {

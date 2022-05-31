@@ -3,6 +3,7 @@ package repo
 import (
 	"database/sql"
 	"gorm.io/gorm"
+	"log"
 	"presentio-server-posts/src/v0/models"
 	"strings"
 )
@@ -15,6 +16,17 @@ func CreatePostsRepo(db *gorm.DB) PostsRepo {
 	return PostsRepo{
 		db,
 	}
+}
+
+func (r *PostsRepo) FindMinimal(postId int64) (*models.Post, error) {
+	var post models.Post
+
+	result := r.db.
+		Where("id = ?", postId).
+		Where("deleted = false").
+		Find(&post)
+
+	return &post, result.Error
 }
 
 func (r *PostsRepo) FindById(postId int64, myUserId int64) (*models.Post, error) {
@@ -32,6 +44,24 @@ func (r *PostsRepo) FindById(postId int64, myUserId int64) (*models.Post, error)
 		First(&post)
 
 	return &post, result.Error
+}
+
+func (r *PostsRepo) FindIdIn(postIds []int64, myUserId int64) ([]models.Post, error) {
+	var posts []models.Post
+
+	result := r.db.
+		Joins("User").
+		Joins("Source").
+		Joins("SourceUser").
+		Joins("Liked", r.db.Where(&models.Like{UserID: myUserId})).
+		Preload("Tags").
+		Preload("Source.Tags").
+		Where("posts.deleted = false").
+		Where("posts.id IN ?", postIds).
+		Find(&posts)
+
+	log.Println(posts[0].PhotoRatio)
+	return posts, result.Error
 }
 
 func (r *PostsRepo) Create(post *models.Post) error {

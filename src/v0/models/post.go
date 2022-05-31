@@ -19,7 +19,7 @@ type Post struct {
 	Source       *Post          `json:"source" binding:"required"`
 	SourceUserID *int64         `json:"sourceUserId" binding:"required"`
 	SourceUser   *User          `json:"sourceUser" binding:"required"`
-	PhotoRatio   *float64       `json:"photoRatio" binding:"required"`
+	PhotoRatio   float64        `json:"photoRatio" binding:"required"`
 	Attachments  pq.StringArray `json:"attachments" binding:"required" gorm:"type:varchar[]"`
 	Lang         string         `json:"lang" binding:"required"`
 	Liked        Like           `json:"liked"`
