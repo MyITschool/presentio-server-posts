@@ -96,7 +96,7 @@ func validateParams(params *PostParams) bool {
 		return false
 	}
 
-	if params.SourceID == nil && (len(params.Tags) > 0 || len(params.Attachments) > 0 || params.PhotoRatio != nil) {
+	if params.SourceID != nil && (params.Tags != nil || params.Attachments != nil || params.PhotoRatio != nil) {
 		return false
 	}
 
