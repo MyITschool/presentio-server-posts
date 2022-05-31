@@ -37,6 +37,7 @@ func (r *PostsRepo) FindById(postId int64, myUserId int64) (*models.Post, error)
 		Joins("Source").
 		Joins("SourceUser").
 		Joins("Liked", r.db.Where(&models.Like{UserID: myUserId})).
+		Joins("Favorite", r.db.Where(&models.Favorite{UserID: myUserId})).
 		Preload("Tags").
 		Preload("Source.Tags").
 		Where("posts.deleted = false").
@@ -54,6 +55,7 @@ func (r *PostsRepo) FindIdIn(postIds []int64, myUserId int64) ([]models.Post, er
 		Joins("Source").
 		Joins("SourceUser").
 		Joins("Liked", r.db.Where(&models.Like{UserID: myUserId})).
+		Joins("Favorite", r.db.Where(&models.Favorite{UserID: myUserId})).
 		Preload("Tags").
 		Preload("Source.Tags").
 		Where("posts.deleted = false").
@@ -89,6 +91,7 @@ func (r *PostsRepo) GetUserPosts(userId int64, page int, myUserId int64) ([]mode
 		Joins("Source").
 		Joins("SourceUser").
 		Joins("Liked", r.db.Where(&models.Like{UserID: myUserId})).
+		Joins("Favorite", r.db.Where(&models.Favorite{UserID: myUserId})).
 		Preload("Tags").
 		Preload("Source.Tags").
 		Limit(20).
@@ -107,6 +110,7 @@ func (r *PostsRepo) FindByQuery(tags []string, keywords []string, page int, myUs
 		Distinct().
 		Where("posts.deleted = false").
 		Joins("Liked", r.db.Where(&models.Like{UserID: myUserId})).
+		Joins("Favorite", r.db.Where(&models.Favorite{UserID: myUserId})).
 		Joins("User").
 		Joins("Source").
 		Joins("SourceUser").
