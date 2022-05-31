@@ -77,6 +77,7 @@ type PostParams struct {
 	Text         string
 	Tags         []string
 	Attachments  []string
+	PhotoRatio   *float64
 	SourceID     *int64
 	SourceUserId *int64
 }
@@ -94,7 +95,7 @@ func validateParams(params *PostParams) bool {
 		return false
 	}
 
-	if params.SourceID != nil && (len(params.Tags) > 0 || len(params.Attachments) > 0) {
+	if params.SourceID != nil && (len(params.Tags) > 0 || len(params.Attachments) > 0) || params.PhotoRatio != nil {
 		return false
 	}
 
@@ -103,6 +104,10 @@ func validateParams(params *PostParams) bool {
 	}
 
 	if len(params.Attachments) < 1 || len(params.Attachments) > 10 {
+		return false
+	}
+
+	if *params.PhotoRatio <= 0 {
 		return false
 	}
 
@@ -151,6 +156,7 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		SourceUserID: params.SourceUserId,
 		Lang:         lang,
 		Attachments:  params.Attachments,
+		PhotoRatio:   params.PhotoRatio,
 	}
 
 	err = h.PostsRepo.Transaction(func(tx *gorm.DB) error {
