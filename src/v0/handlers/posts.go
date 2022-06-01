@@ -138,7 +138,7 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		return
 	}
 
-	lang := strings.ToLower(whatlanggo.DetectLang(params.Text).String())
+	_ = strings.ToLower(whatlanggo.DetectLang(params.Text).String())
 
 	tags := make([]models.Tag, 0, len(params.Tags))
 
@@ -159,7 +159,7 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		CreatedAt:    time.Now(),
 		SourceID:     params.SourceID,
 		SourceUserID: params.SourceUserId,
-		Lang:         lang,
+		Lang:         "english",
 		Attachments:  params.Attachments,
 		PhotoRatio:   *params.PhotoRatio,
 	}
