@@ -127,7 +127,7 @@ func (r *PostsRepo) FindByQuery(tags []string, keywords []string, page int, myUs
 	}
 
 	if len(keywords) > 0 {
-		tx = tx.Where("posts.ts @@ to_tsquery(getlang(posts.id), ?)", strings.Join(keywords, "|"))
+		tx = tx.Where("posts.ts @@ to_tsquery('english', ?)", strings.Join(keywords, "|"))
 	}
 
 	err := tx.Find(&posts).Error

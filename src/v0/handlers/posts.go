@@ -155,7 +155,6 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		CreatedAt:    time.Now(),
 		SourceID:     params.SourceID,
 		SourceUserID: params.SourceUserId,
-		Lang:         util.GetLang(params.Text),
 		Attachments:  params.Attachments,
 		PhotoRatio:   *params.PhotoRatio,
 	}
