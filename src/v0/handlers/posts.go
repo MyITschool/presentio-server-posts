@@ -2,14 +2,12 @@ package handlers
 
 import (
 	"errors"
-	"github.com/abadojack/whatlanggo"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"presentio-server-posts/src/v0/models"
 	"presentio-server-posts/src/v0/repo"
 	"presentio-server-posts/src/v0/util"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -138,8 +136,6 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		return
 	}
 
-	_ = strings.ToLower(whatlanggo.DetectLang(params.Text).String())
-
 	tags := make([]models.Tag, 0, len(params.Tags))
 
 	for i := 0; i < len(params.Tags); i++ {
@@ -159,7 +155,7 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		CreatedAt:    time.Now(),
 		SourceID:     params.SourceID,
 		SourceUserID: params.SourceUserId,
-		Lang:         "english",
+		Lang:         util.GetLang(params.Text),
 		Attachments:  params.Attachments,
 		PhotoRatio:   *params.PhotoRatio,
 	}

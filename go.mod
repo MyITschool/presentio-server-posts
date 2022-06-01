@@ -3,7 +3,6 @@ module presentio-server-posts
 go 1.18
 
 require (
-	github.com/abadojack/whatlanggo v1.0.1
 	github.com/gin-gonic/gin v1.7.7
 	github.com/golang-jwt/jwt/v4 v4.4.1
 	github.com/lib/pq v1.10.3
