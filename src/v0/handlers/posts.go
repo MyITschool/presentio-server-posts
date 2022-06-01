@@ -346,6 +346,11 @@ func (h *PostsHandler) search(c *gin.Context) {
 
 	posts, err := h.PostsRepo.FindByQuery(tags, keywords, page, claims.ID)
 
+	if err != nil {
+		c.Status(500)
+		return
+	}
+
 	for i := 0; i < len(posts); i++ {
 		posts[i].Own = posts[i].UserID == claims.ID
 	}
