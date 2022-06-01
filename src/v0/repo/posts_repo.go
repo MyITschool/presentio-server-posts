@@ -60,6 +60,7 @@ func (r *PostsRepo) FindIdIn(postIds []int64, myUserId int64) ([]models.Post, er
 		Preload("Source.Tags").
 		Where("posts.deleted = false").
 		Where("posts.id IN ?", postIds).
+		Order("posts.id DESC").
 		Find(&posts)
 
 	log.Println(posts[0].PhotoRatio)
@@ -120,7 +121,7 @@ func (r *PostsRepo) FindByQuery(tags []string, keywords []string, page int, myUs
 		Preload("Source.Tags").
 		Limit(20).
 		Offset(20 * page).
-		Order("posts.id")
+		Order("posts.id DESC")
 
 	if len(tags) > 0 {
 		tx = tx.Where("t.name IN ?", tags)

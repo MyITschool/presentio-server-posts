@@ -23,7 +23,7 @@ func (r *FavoritesRepo) GetUserFavorites(userId int64, page int) ([]int64, error
 		Where("user_id = ?", userId).
 		Offset(page*20).
 		Limit(20).
-		Order("id desc").
+		Order("id DESC").
 		Model(&models.Favorite{}).
 		Pluck("post_id", &results)
 
