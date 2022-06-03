@@ -6,8 +6,10 @@ import (
 	"gorm.io/gorm"
 	"presentio-server-posts/src/v0/models"
 	"presentio-server-posts/src/v0/repo"
+	"presentio-server-posts/src/v0/service"
 	"presentio-server-posts/src/v0/util"
 	"strconv"
+	"time"
 )
 
 type FavoritesHandler struct {
@@ -123,6 +125,13 @@ func (h *FavoritesHandler) addFavorite(c *gin.Context) {
 		if err != nil {
 			return err
 		}
+
+		err = service.AddFeedback(&service.FeedbackEntity{
+			FeedbackType: "favorite",
+			ItemId:       strconv.FormatInt(postId, 10),
+			Timestamp:    time.Now().Format(time.RFC3339),
+			UserId:       strconv.FormatInt(claims.ID, 10),
+		})
 
 		c.Status(201)
 		return nil

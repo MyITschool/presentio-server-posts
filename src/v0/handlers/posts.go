@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"presentio-server-posts/src/v0/models"
 	"presentio-server-posts/src/v0/repo"
+	"presentio-server-posts/src/v0/service"
 	"presentio-server-posts/src/v0/util"
 	"strconv"
 	"time"
@@ -159,6 +160,13 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		PhotoRatio:   *params.PhotoRatio,
 	}
 
+	entity := &service.ItemEntity{
+		Categories: params.Tags,
+		Labels:     params.Tags,
+		IsHidden:   false,
+		Timestamp:  time.Now().Format(time.RFC3339),
+	}
+
 	err = h.PostsRepo.Transaction(func(tx *gorm.DB) error {
 		postsRepo := repo.CreatePostsRepo(tx)
 		tagsRepo := repo.CreateTagsRepo(tx)
@@ -197,14 +205,32 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		if err != nil {
 			return err
 		}
-		c.Status(201)
 
+		err = service.CreateOrUpdateRecItem(entity)
+
+		if err != nil {
+			return err
+		}
+
+		if params.SourceID != nil {
+			err = service.AddFeedback(&service.FeedbackEntity{
+				FeedbackType: "repost",
+				ItemId:       strconv.FormatInt(*params.SourceID, 10),
+				Timestamp:    time.Now().Format(time.RFC3339),
+				UserId:       strconv.FormatInt(claims.ID, 10),
+			})
+
+			if err != nil {
+				return err
+			}
+		}
+
+		c.Status(201)
 		return nil
 	})
 
 	if err != nil {
 		c.Status(500)
-		return
 	}
 }
 
@@ -231,19 +257,35 @@ func (h *PostsHandler) deletePost(c *gin.Context) {
 		return
 	}
 
-	rows, err := h.PostsRepo.DeleteWithGuard(postId, claims.ID)
+	err = h.PostsRepo.Transaction(func(tx *gorm.DB) error {
+		postsRepo := repo.CreatePostsRepo(tx)
+
+		rows, err := postsRepo.DeleteWithGuard(postId, claims.ID)
+
+		if err != nil {
+			return err
+		}
+
+		if rows == 0 {
+			c.Status(404)
+			return nil
+		}
+
+		err = service.CreateOrUpdateRecItem(&service.ItemEntity{
+			ItemId: strconv.FormatInt(postId, 10),
+		})
+
+		if err != nil {
+			return err
+		}
+
+		c.Status(204)
+		return nil
+	})
 
 	if err != nil {
 		c.Status(500)
-		return
 	}
-
-	if rows == 0 {
-		c.Status(404)
-		return
-	}
-
-	c.Status(204)
 }
 
 func (h *PostsHandler) getUserPosts(c *gin.Context) {

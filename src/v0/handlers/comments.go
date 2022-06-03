@@ -5,8 +5,10 @@ import (
 	"gorm.io/gorm"
 	"presentio-server-posts/src/v0/models"
 	"presentio-server-posts/src/v0/repo"
+	"presentio-server-posts/src/v0/service"
 	"presentio-server-posts/src/v0/util"
 	"strconv"
+	"time"
 )
 
 type CommentsHandler struct {
@@ -81,6 +83,17 @@ func (h *CommentsHandler) createComment(c *gin.Context) {
 			return err
 		}
 
+		err = service.AddFeedback(&service.FeedbackEntity{
+			FeedbackType: "comment",
+			ItemId:       strconv.FormatInt(postId, 10),
+			Timestamp:    time.Now().Format(time.RFC3339),
+			UserId:       strconv.FormatInt(claims.ID, 10),
+		})
+
+		if err != nil {
+			return err
+		}
+
 		c.JSON(201, comment)
 		return nil
 	})
@@ -93,7 +106,6 @@ func (h *CommentsHandler) createComment(c *gin.Context) {
 		c.Status(500)
 		return
 	}
-
 }
 
 func (h *CommentsHandler) getPostComments(c *gin.Context) {

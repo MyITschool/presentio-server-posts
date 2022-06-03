@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"presentio-server-posts/src/v0/models"
 	"presentio-server-posts/src/v0/repo"
+	"presentio-server-posts/src/v0/service"
 	"presentio-server-posts/src/v0/util"
 	"strconv"
 )
@@ -140,6 +141,12 @@ func (h *LikesHandler) removeLike(c *gin.Context) {
 		if err != nil {
 			return err
 		}
+
+		err = service.RemoveFeedback(&service.FeedbackEntity{
+			FeedbackType: "like",
+			ItemId:       strconv.FormatInt(postId, 10),
+			UserId:       strconv.FormatInt(claims.ID, 10),
+		})
 
 		c.Status(204)
 		return nil
