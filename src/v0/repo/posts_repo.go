@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
 	"presentio-server-posts/src/v0/models"
 	"strings"
 )
@@ -64,7 +63,6 @@ func (r *PostsRepo) FindIdIn(postIds []int64, myUserId int64) ([]models.Post, er
 		Order("posts.id DESC").
 		Find(&posts)
 
-	log.Println(posts[0].PhotoRatio)
 	return posts, result.Error
 }
 
