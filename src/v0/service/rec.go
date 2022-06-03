@@ -29,7 +29,7 @@ func init() {
 		}).Dial,
 	}
 
-	apiKey = os.Getenv("REC_API_KEY")
+	apiKey = os.Getenv("GORSE_SERVER_API_KEY")
 }
 
 type ItemEntity struct {
