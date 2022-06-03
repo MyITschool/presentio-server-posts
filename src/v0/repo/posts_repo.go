@@ -3,6 +3,7 @@ package repo
 import (
 	"database/sql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"log"
 	"presentio-server-posts/src/v0/models"
 	"strings"
@@ -72,12 +73,27 @@ func (r *PostsRepo) Create(post *models.Post) error {
 }
 
 func (r *PostsRepo) DeleteWithGuard(postId int64, userId int64) (int64, error) {
+	var post models.Post
+
 	tx := r.db.
 		Where("id = ?", postId).
 		Where("user_id = ?", userId).
 		Where("deleted = false").
-		Model((*models.Post)(nil)).
+		Model(&post).
+		Clauses(clause.Returning{Columns: []clause.Column{{Name: "source_id"}}}).
 		Updates(map[string]interface{}{"text": "", "deleted": true, "reposts": 0, "likes": 0})
+
+	if tx.Error != nil {
+		return 0, nil
+	}
+
+	if post.SourceID != nil {
+		_, err := r.DecrementReposts(*post.SourceID)
+
+		if err != nil {
+			return 0, err
+		}
+	}
 
 	return tx.RowsAffected, tx.Error
 }
@@ -164,6 +180,13 @@ func (r *PostsRepo) IncrementComments(postId int64) (int64, error) {
 func (r *PostsRepo) IncrementReposts(postId int64) (int64, error) {
 	tx := r.db.
 		Exec("UPDATE posts SET reposts = reposts + 1 WHERE id = ? AND deleted = false", postId)
+
+	return tx.RowsAffected, tx.Error
+}
+
+func (r *PostsRepo) DecrementReposts(postId int64) (int64, error) {
+	tx := r.db.
+		Exec("UPDATE posts SET reposts = reposts - 1 WHERE id = ? AND deleted = false", postId)
 
 	return tx.RowsAffected, tx.Error
 }
