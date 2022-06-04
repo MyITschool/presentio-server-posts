@@ -189,6 +189,12 @@ func (h *FavoritesHandler) deleteFavorite(c *gin.Context) {
 			return err
 		}
 
+		err = service.RemoveFeedback(&service.FeedbackEntity{
+			FeedbackType: "favorite",
+			UserId:       strconv.FormatInt(claims.ID, 10),
+			ItemId:       strconv.FormatInt(postId, 10),
+		})
+
 		c.Status(204)
 		return nil
 	})
