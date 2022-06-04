@@ -272,7 +272,10 @@ func (h *PostsHandler) deletePost(c *gin.Context) {
 		}
 
 		err = service.CreateOrUpdateRecItem(&service.ItemEntity{
-			ItemId: strconv.FormatInt(postId, 10),
+			IsHidden:   true,
+			Categories: []string{},
+			Labels:     []string{},
+			ItemId:     strconv.FormatInt(postId, 10),
 		})
 
 		if err != nil {

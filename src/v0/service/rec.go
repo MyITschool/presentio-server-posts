@@ -54,7 +54,7 @@ func CreateOrUpdateRecItem(entity *ItemEntity) error {
 
 	log.Println(string(body))
 
-	req.SetRequestURI(RecApiAddr + "/item")
+	req.SetRequestURI(RecApiAddr + "/api/item")
 	req.Header.SetContentType(ReqContentType)
 	req.Header.SetMethod(fasthttp.MethodPost)
 	req.Header.Set("X-API-Key", apiKey)
