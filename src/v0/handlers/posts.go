@@ -96,7 +96,7 @@ func validateParams(params *PostParams) bool {
 	}
 
 	if params.SourceID != nil {
-		return params.Tags != nil || params.Attachments != nil || params.PhotoRatio != nil
+		return params.Tags == nil && params.Attachments == nil && params.PhotoRatio == nil
 	}
 
 	if len(params.Tags) < 1 || len(params.Tags) > 5 {
@@ -107,7 +107,7 @@ func validateParams(params *PostParams) bool {
 		return false
 	}
 
-	if *params.PhotoRatio <= 0 {
+	if params.PhotoRatio == nil || *params.PhotoRatio <= 0 {
 		return false
 	}
 
@@ -149,6 +149,14 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 	if params.PhotoRatio == nil {
 		r := 0.0
 		params.PhotoRatio = &r
+	}
+
+	if params.Tags == nil {
+		params.Tags = []string{}
+	}
+
+	if params.Attachments == nil {
+		params.Attachments = []string{}
 	}
 
 	post := models.Post{
@@ -213,9 +221,11 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 			return err
 		}
 
-		log.Println(params.SourceID != nil)
+		log.Println("from outside")
 
 		if post.SourceID != nil {
+			log.Println("from block")
+
 			err = service.AddFeedback([]service.FeedbackEntity{{
 				FeedbackType: "repost",
 				ItemId:       strconv.FormatInt(*params.SourceID, 10),
