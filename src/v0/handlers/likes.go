@@ -9,6 +9,7 @@ import (
 	"presentio-server-posts/src/v0/service"
 	"presentio-server-posts/src/v0/util"
 	"strconv"
+	"time"
 )
 
 type LikesHandler struct {
@@ -72,6 +73,17 @@ func (h *LikesHandler) likePost(c *gin.Context) {
 		err = likesRepo.Create(&models.Like{
 			UserID: claims.ID,
 			PostID: postId,
+		})
+
+		if err != nil {
+			return err
+		}
+
+		err = service.AddFeedback(&service.FeedbackEntity{
+			FeedbackType: "like",
+			ItemId:       strconv.FormatInt(postId, 10),
+			Timestamp:    time.Now().Format(time.RFC3339),
+			UserId:       strconv.FormatInt(claims.ID, 10),
 		})
 
 		if err != nil {
