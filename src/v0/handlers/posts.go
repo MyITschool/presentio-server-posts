@@ -169,13 +169,6 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		PhotoRatio:   *params.PhotoRatio,
 	}
 
-	entity := &service.ItemEntity{
-		Categories: params.Tags,
-		Labels:     params.Tags,
-		IsHidden:   false,
-		Timestamp:  time.Now().Format(time.RFC3339),
-	}
-
 	err = h.PostsRepo.Transaction(func(tx *gorm.DB) error {
 		postsRepo := repo.CreatePostsRepo(tx)
 		tagsRepo := repo.CreateTagsRepo(tx)
@@ -199,23 +192,27 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 			return err
 		}
 
-		if len(tags) == 0 {
-			return nil
+		if len(tags) != 0 {
+			err = tagsRepo.BulkInsert(tags)
+
+			if err != nil {
+				return err
+			}
+
+			err = tagsRepo.BulkInsertRelation(tags, post.ID)
+
+			if err != nil {
+				return err
+			}
 		}
 
-		err = tagsRepo.BulkInsert(tags)
-
-		if err != nil {
-			return err
-		}
-
-		err = tagsRepo.BulkInsertRelation(tags, post.ID)
-
-		if err != nil {
-			return err
-		}
-
-		err = service.CreateOrUpdateRecItem(entity)
+		err = service.CreateOrUpdateRecItem(&service.ItemEntity{
+			ItemId:     strconv.FormatInt(post.ID, 10),
+			Categories: params.Tags,
+			Labels:     params.Tags,
+			IsHidden:   false,
+			Timestamp:  time.Now().Format(time.RFC3339),
+		})
 
 		if err != nil {
 			return err
