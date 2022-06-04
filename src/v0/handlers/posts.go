@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"log"
 	"presentio-server-posts/src/v0/models"
 	"presentio-server-posts/src/v0/repo"
 	"presentio-server-posts/src/v0/service"
@@ -211,6 +212,8 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		if err != nil {
 			return err
 		}
+
+		log.Println(params.SourceID != nil)
 
 		if params.SourceID != nil {
 			err = service.AddFeedback([]service.FeedbackEntity{{
