@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	RecApiAddr = "https://presentio-gorse-master.herokuapp.com/"
+	RecApiAddr     = "https://presentio-gorse-master.herokuapp.com/"
+	ReqContentType = "application/json"
 )
 
 var client *fasthttp.Client
@@ -50,6 +51,7 @@ func CreateOrUpdateRecItem(entity *ItemEntity) error {
 	}
 
 	req.SetRequestURI(RecApiAddr + "/item")
+	req.Header.SetContentType(ReqContentType)
 	req.Header.SetMethod(fasthttp.MethodPost)
 	req.Header.Set("X-API-Key", apiKey)
 	req.SetBodyRaw(body)
@@ -90,6 +92,7 @@ func AddFeedback(entity *FeedbackEntity) error {
 
 	req.SetRequestURI(RecApiAddr + "/api/feedback")
 	req.Header.SetMethod(fasthttp.MethodPost)
+	req.Header.SetContentType(ReqContentType)
 	req.Header.Set("X-API-Key", apiKey)
 	req.SetBodyRaw(body)
 
@@ -115,6 +118,7 @@ func RemoveFeedback(entity *FeedbackEntity) error {
 	req := fasthttp.AcquireRequest()
 
 	req.SetRequestURI(RecApiAddr + "/api/feedback/" + entity.FeedbackType + "/" + entity.UserId + "/" + entity.ItemId)
+	req.Header.SetContentType(ReqContentType)
 	req.Header.SetMethod(fasthttp.MethodDelete)
 	req.Header.Set("X-API-Key", apiKey)
 
