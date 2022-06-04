@@ -213,12 +213,12 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 		}
 
 		if params.SourceID != nil {
-			err = service.AddFeedback(&service.FeedbackEntity{
+			err = service.AddFeedback([]service.FeedbackEntity{{
 				FeedbackType: "repost",
 				ItemId:       strconv.FormatInt(*params.SourceID, 10),
 				Timestamp:    time.Now().Format(time.RFC3339),
 				UserId:       strconv.FormatInt(claims.ID, 10),
-			})
+			}})
 
 			if err != nil {
 				return err

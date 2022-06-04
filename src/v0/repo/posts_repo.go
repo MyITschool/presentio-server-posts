@@ -24,7 +24,7 @@ func (r *PostsRepo) FindMinimal(postId int64) (*models.Post, error) {
 	result := r.db.
 		Where("id = ?", postId).
 		Where("deleted = false").
-		Find(&post)
+		First(&post)
 
 	return &post, result.Error
 }

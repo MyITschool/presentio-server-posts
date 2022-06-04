@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/valyala/fasthttp"
+	"log"
 	"os"
 	"time"
 )
@@ -34,6 +35,7 @@ func init() {
 }
 
 type ItemEntity struct {
+	Comment    string
 	Categories []string
 	IsHidden   bool
 	ItemId     string
@@ -44,11 +46,13 @@ type ItemEntity struct {
 func CreateOrUpdateRecItem(entity *ItemEntity) error {
 	req := fasthttp.AcquireRequest()
 
-	body, err := json.Marshal(entity)
+	body, err := json.Marshal(*entity)
 
 	if err != nil {
 		return err
 	}
+
+	log.Println(string(body))
 
 	req.SetRequestURI(RecApiAddr + "/item")
 	req.Header.SetContentType(ReqContentType)
@@ -79,12 +83,15 @@ type FeedbackEntity struct {
 	ItemId       string
 	Timestamp    string
 	UserId       string
+	Comment      string
 }
 
-func AddFeedback(entity *FeedbackEntity) error {
+func AddFeedback(entities []FeedbackEntity) error {
 	req := fasthttp.AcquireRequest()
 
-	body, err := json.Marshal(entity)
+	body, err := json.Marshal(entities)
+
+	log.Println(string(body))
 
 	if err != nil {
 		return err

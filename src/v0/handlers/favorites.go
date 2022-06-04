@@ -126,12 +126,16 @@ func (h *FavoritesHandler) addFavorite(c *gin.Context) {
 			return err
 		}
 
-		err = service.AddFeedback(&service.FeedbackEntity{
+		err = service.AddFeedback([]service.FeedbackEntity{{
 			FeedbackType: "favorite",
 			ItemId:       strconv.FormatInt(postId, 10),
 			Timestamp:    time.Now().Format(time.RFC3339),
 			UserId:       strconv.FormatInt(claims.ID, 10),
-		})
+		}})
+
+		if err != nil {
+			return err
+		}
 
 		c.Status(201)
 		return nil
