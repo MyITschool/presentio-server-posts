@@ -215,7 +215,7 @@ func (h *PostsHandler) createPost(c *gin.Context) {
 
 		log.Println(params.SourceID != nil)
 
-		if params.SourceID != nil {
+		if post.SourceID != nil {
 			err = service.AddFeedback([]service.FeedbackEntity{{
 				FeedbackType: "repost",
 				ItemId:       strconv.FormatInt(*params.SourceID, 10),
